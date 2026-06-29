@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trigo Part A · SST S3 Quiz</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --ink: #0f0e17;
+  --paper: #fffffe;
+  --primary: #ff6b35;
+  --primary-dark: #e5561f;
+  --sky: #2cb67d;
+  --sky-dark: #1e9463;
+  --lavender: #7c3aed;
+  --gold: #f59e0b;
+  --surface: #f8f7ff;
+  --border: #e8e4f0;
+  --muted: #6b6880;
+  --wrong: #ef4444;
+  --right: #10b981;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── HOME SCREEN ── */
+#homeScreen {
+  background: var(--ink);
+  color: var(--paper);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* animated angle grid background */
+#homeScreen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(60deg, rgba(255,107,53,0.06) 1px, transparent 1px),
+    linear-gradient(-60deg, rgba(44,182,125,0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 40px 40px;
+  animation: drift 20s linear infinite;
+}
+@keyframes drift { to { background-position: 80px 0, -80px 0, 0 40px; } }
+
+.home-content { position: relative; z-index: 1; max-width: 440px; }
+
+.badge {
+  display: inline-block;
+  background: rgba(255,107,53,0.15);
+  border: 1px solid rgba(255,107,53,0.3);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.home-title {
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+
+.home-title .accent { color: var(--primary); }
+
+.home-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+.name-form { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+.name-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: var(--paper);
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.name-input::placeholder { color: rgba(255,255,255,0.3); }
+.name-input:focus { border-color: var(--primary); }
+
+.start-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.start-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.start-btn:active { transform: translateY(0); }
+
+.leaderboard-preview-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  padding: 12px;
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.leaderboard-preview-btn:hover { border-color: rgba(255,255,255,0.35); color: white; }
+
+.topic-chips {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.topic-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.chip-a { border-color: rgba(255,107,53,0.4); color: var(--primary); }
+.chip-b { border-color: rgba(44,182,125,0.4); color: var(--sky); }
+.chip-c { border-color: rgba(124,58,237,0.4); color: #a78bfa; }
+.chip-d { border-color: rgba(245,158,11,0.4); color: var(--gold); }
+
+/* ── QUIZ SCREEN ── */
+#quizScreen {
+  background: var(--surface);
+  flex-direction: column;
+}
+
+.quiz-topbar {
+  background: var(--ink);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.quiz-topbar-left { display: flex; flex-direction: column; }
+.quiz-player-name { font-size: 13px; font-weight: 700; color: var(--primary); }
+.quiz-progress-text { font-size: 11px; color: rgba(255,255,255,0.45); font-family: 'JetBrains Mono', monospace; }
+
+.quiz-score-display {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px 14px;
+  text-align: center;
+}
+.quiz-score-display .score-num { font-size: 20px; font-weight: 800; color: var(--primary); font-family: 'JetBrains Mono', monospace; }
+.quiz-score-display .score-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* progress bar */
+.progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--gold));
+  transition: width 0.4s ease;
+  border-radius: 0 2px 2px 0;
+}
+
+/* question card */
+.quiz-body {
+  flex: 1;
+  padding: 24px 20px;
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.q-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.q-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.q-tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tag-ratios { background: rgba(255,107,53,0.1); color: var(--primary); }
+.tag-obtuse { background: rgba(124,58,237,0.1); color: var(--lavender); }
+.tag-area   { background: rgba(44,182,125,0.1); color: var(--sky); }
+.tag-sine   { background: rgba(245,158,11,0.1); color: var(--gold); }
+.tag-cosine { background: rgba(239,68,68,0.1); color: var(--wrong); }
+
+.q-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.q-text {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.q-subtext {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+.q-math {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  display: block;
+}
+
+/* options */
+.options { display: flex; flex-direction: column; gap: 10px; }
+
+.opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(255,107,53,0.03); transform: translateX(2px); }
+.opt-btn:disabled { cursor: default; }
+
+.opt-letter {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.opt-btn.correct {
+  border-color: var(--right);
+  background: rgba(16,185,129,0.06);
+}
+.opt-btn.correct .opt-letter { background: var(--right); border-color: var(--right); color: white; }
+
+.opt-btn.wrong {
+  border-color: var(--wrong);
+  background: rgba(239,68,68,0.06);
+}
+.opt-btn.wrong .opt-letter { background: var(--wrong); border-color: var(--wrong); color: white; }
+
+.opt-btn.dimmed { opacity: 0.4; }
+
+/* feedback */
+.feedback-box {
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  display: none;
+}
+.feedback-box.show { display: block; }
+.feedback-box.correct-fb { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+.feedback-box.wrong-fb { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+.feedback-box .fb-head { font-weight: 700; margin-bottom: 4px; }
+.feedback-box.correct-fb .fb-head { color: var(--right); }
+.feedback-box.wrong-fb .fb-head { color: var(--wrong); }
+.feedback-box .fb-math { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.04); padding: 6px 10px; border-radius: 6px; margin-top: 6px; display: block; }
+
+.next-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  display: none;
+  transition: all 0.15s;
+}
+.next-btn.show { display: block; }
+.next-btn:hover { background: #1a1826; }
+
+/* ── RESULTS SCREEN ── */
+#resultsScreen {
+  background: var(--ink);
+  color: white;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+#resultsScreen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.results-content { position: relative; z-index: 1; width: 100%; max-width: 500px; margin: 0 auto; }
+
+.results-emoji { font-size: 60px; text-align: center; margin-bottom: 12px; }
+.results-title { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+.results-player { text-align: center; font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 28px; }
+
+.score-ring-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
+.score-ring {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) 0%, var(--primary) var(--pct, 0%), rgba(255,255,255,0.08) var(--pct, 0%));
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.score-ring::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+.score-ring-text { position: relative; z-index: 1; text-align: center; }
+.score-ring-num { font-size: 32px; font-weight: 800; font-family: 'JetBrains Mono', monospace; display: block; }
+.score-ring-den { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+.result-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.stat-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.stat-box .val { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.stat-box .lbl { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-box.good .val { color: var(--right); }
+.stat-box.bad .val { color: var(--wrong); }
+.stat-box.time .val { color: var(--gold); }
+
+.result-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.btn-primary-r {
+  padding: 14px; border-radius: 10px; border: none;
+  background: var(--primary); color: white;
+  font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-primary-r:hover { background: var(--primary-dark); }
+.btn-secondary-r {
+  padding: 13px; border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.15); background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-secondary-r:hover { border-color: rgba(255,255,255,0.35); color: white; }
+
+/* ── LEADERBOARD SCREEN ── */
+#leaderScreen {
+  background: var(--ink);
+  color: white;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.leader-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-top: 8px;
+}
+.leader-header h2 { font-size: 26px; font-weight: 800; }
+.leader-header p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  height: 140px;
+}
+.podium-slot {
+  flex: 1;
+  max-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.podium-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 4px;
+}
+.podium-score-small {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+.podium-block {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: height 0.5s ease;
+}
+.podium-slot.rank-1 .podium-block { background: linear-gradient(180deg, #f59e0b, #d97706); height: 90px; }
+.podium-slot.rank-2 .podium-block { background: linear-gradient(180deg, #94a3b8, #64748b); height: 65px; }
+.podium-slot.rank-3 .podium-block { background: linear-gradient(180deg, #f97316, #ea580c); height: 48px; }
+.podium-slot.empty .podium-block { background: rgba(255,255,255,0.05); height: 48px; font-size: 16px; color: rgba(255,255,255,0.2); }
+
+.leader-list { display: flex; flex-direction: column; gap: 8px; max-width: 500px; margin: 0 auto 24px; }
+
+.leader-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: background 0.15s;
+}
+.leader-row.me {
+  background: rgba(255,107,53,0.1);
+  border-color: rgba(255,107,53,0.3);
+}
+.leader-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.leader-rank.top { color: var(--gold); }
+.leader-name { flex: 1; font-size: 14px; font-weight: 600; }
+.leader-name .you-tag { font-size: 10px; background: rgba(255,107,53,0.3); color: var(--primary); border-radius: 4px; padding: 1px 6px; margin-left: 6px; font-weight: 700; }
+.leader-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.leader-pct { font-size: 11px; color: rgba(255,255,255,0.3); font-family: 'JetBrains Mono', monospace; }
+
+.empty-leader {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255,255,255,0.25);
+}
+.empty-leader .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-leader p { font-size: 13px; }
+
+.leader-back {
+  display: block;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  width: 100%;
+}
+.leader-back:hover { border-color: rgba(255,255,255,0.35); color: white; }
+
+/* toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.3s ease;
+  z-index: 100;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* streak flash */
+.streak-flash {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  transition: all 0.1s;
+  text-shadow: 0 0 40px rgba(255,107,53,0.6);
+}
+.streak-flash.pop { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+.streak-flash.fade { transform: translate(-50%, -50%) scale(1.3); opacity: 0; transition: all 0.4s ease; }
+
+/* ── REVISION SCREEN ── */
+#revisionScreen {
+  background: var(--ink);
+  color: white;
+  overflow: hidden;
+  position: relative;
+  height: 100vh;
+  display: none;
+  flex-direction: column;
+}
+#revisionScreen.active { display: flex; }
+
+/* progress dots */
+.rev-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 0 0;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.rev-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+.rev-dot.active { width: 22px; border-radius: 3px; background: var(--primary); }
+
+/* slide deck */
+.rev-deck {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.rev-slide {
+  position: absolute;
+  inset: 0;
+  padding: 16px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.38s ease;
+  will-change: transform;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.rev-slide::-webkit-scrollbar { display: none; }
+.rev-slide.slide-current { transform: translateX(0); opacity: 1; }
+.rev-slide.slide-right    { transform: translateX(100%); opacity: 0; pointer-events: none; }
+.rev-slide.slide-left     { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+
+/* topic header */
+.rev-slide-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rev-big-icon {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.rev-slide-title h2 { font-size: 20px; font-weight: 800; line-height: 1.1; }
+.rev-slide-title .rev-num { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; opacity: 0.5; }
+
+/* hook card */
+.rev-hook {
+  border-radius: 14px;
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.rev-hook-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+/* SVG diagram card */
+.rev-diagram {
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rev-diagram svg { max-width: 100%; height: auto; }
+
+/* formula pill */
+.rev-formula-card {
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rev-formula-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
+}
+.rev-formula-big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+.rev-formula-big .hi  { color: #ff9f6b; }
+.rev-formula-big .hi2 { color: #6bffb8; }
+.rev-formula-big .hi3 { color: #ffe06b; }
+.rev-formula-big .hi4 { color: #b8a4ff; }
+
+/* cheat code */
+.rev-cheatcode {
+  border-radius: 14px;
+  padding: 12px 15px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px dashed rgba(255,255,255,0.15);
+}
+.rev-cheat-badge {
+  background: var(--primary);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rev-cheat-text { font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.75); }
+
+/* watch-out */
+.rev-watchout {
+  border-radius: 14px;
+  padding: 11px 14px;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.7);
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+/* colour themes per topic */
+.theme-ratios  .rev-big-icon { background: rgba(255,107,53,0.18); }
+.theme-obtuse  .rev-big-icon { background: rgba(124,58,237,0.2); }
+.theme-area    .rev-big-icon { background: rgba(44,182,125,0.18); }
+.theme-sine    .rev-big-icon { background: rgba(245,158,11,0.18); }
+.theme-cosine  .rev-big-icon { background: rgba(99,179,237,0.18); }
+
+.theme-ratios  .rev-hook      { background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.18); }
+.theme-obtuse  .rev-hook      { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.18); }
+.theme-area    .rev-hook      { background: rgba(44,182,125,0.08); border: 1px solid rgba(44,182,125,0.18); }
+.theme-sine    .rev-hook      { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.18); }
+.theme-cosine  .rev-hook      { background: rgba(99,179,237,0.08); border: 1px solid rgba(99,179,237,0.2); }
+
+.theme-ratios  .rev-formula-card { background: rgba(255,107,53,0.07); border: 1px solid rgba(255,107,53,0.15); }
+.theme-obtuse  .rev-formula-card { background: rgba(124,58,237,0.07); border: 1px solid rgba(124,58,237,0.15); }
+.theme-area    .rev-formula-card { background: rgba(44,182,125,0.07); border: 1px solid rgba(44,182,125,0.15); }
+.theme-sine    .rev-formula-card { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.15); }
+.theme-cosine  .rev-formula-card { background: rgba(99,179,237,0.06); border: 1px solid rgba(99,179,237,0.15); }
+
+/* nav bar */
+.rev-nav {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px 20px;
+  flex-shrink: 0;
+}
+.rev-prev-btn, .rev-next-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 12px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.rev-prev-btn { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rev-prev-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+.rev-next-btn { background: var(--primary); color: white; }
+.rev-next-btn:hover { background: var(--primary-dark); }
+
+/* ── SOLUTIONS SCREEN ── */
+#solutionsScreen {
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+.sol-topbar {
+  background: var(--ink);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.sol-topbar h2 { font-size: 15px; font-weight: 700; }
+.sol-score-badge {
+  background: rgba(255,107,53,0.2);
+  border: 1px solid rgba(255,107,53,0.3);
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.sol-body { padding: 16px; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+.sol-filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.sol-filter-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.sol-filter-btn.active-all   { border-color: var(--ink); color: var(--ink); background: var(--ink); color: white; }
+.sol-filter-btn.active-wrong { border-color: var(--wrong); color: var(--wrong); background: rgba(239,68,68,0.06); }
+.sol-filter-btn.active-right { border-color: var(--right); color: var(--right); background: rgba(16,185,129,0.06); }
+
+.sol-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.sol-card.sol-correct { border-color: rgba(16,185,129,0.35); }
+.sol-card.sol-wrong   { border-color: rgba(239,68,68,0.3); }
+
+.sol-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.sol-card-header:hover { background: rgba(0,0,0,0.01); }
+
+.sol-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sol-correct .sol-status-dot { background: var(--right); }
+.sol-wrong   .sol-status-dot { background: var(--wrong); }
+
+.sol-q-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.sol-q-topic {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.sol-tag-ratios { background: rgba(255,107,53,0.1); color: var(--primary); }
+.sol-tag-obtuse { background: rgba(124,58,237,0.1); color: var(--lavender); }
+.sol-tag-area   { background: rgba(44,182,125,0.1); color: var(--sky); }
+.sol-tag-sine   { background: rgba(245,158,11,0.1); color: var(--gold); }
+.sol-tag-cosine { background: rgba(239,68,68,0.1); color: var(--wrong); }
+
+.sol-q-preview {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sol-chevron { font-size: 11px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+.sol-card.sol-open .sol-chevron { transform: rotate(90deg); }
+
+.sol-card-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.sol-card.sol-open .sol-card-body { display: block; }
+
+.sol-q-full {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.sol-math-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  display: block;
+}
+.sol-answers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.sol-answer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.sol-answer-row.sol-a-correct { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+.sol-answer-row.sol-a-wrong   { background: rgba(239,68,68,0.07);  border: 1px solid rgba(239,68,68,0.2); }
+.sol-answer-row.sol-a-plain   { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+.sol-answer-icon { font-size: 14px; flex-shrink: 0; }
+.sol-answer-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-right: 2px; color: var(--muted); }
+
+.sol-working {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #3d3a4e;
+}
+.sol-working-head {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.sol-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  background: white;
+  position: sticky;
+  bottom: 0;
+}
+.sol-action-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.sol-action-primary { background: var(--primary); color: white; }
+.sol-action-primary:hover { background: var(--primary-dark); }
+.sol-action-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border); }
+.sol-action-secondary:hover { border-color: var(--ink); }
+
+/* ── CONFIG MODAL ── */
+.config-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.config-box {
+  background: #1a1826;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.config-box h3 { font-size: 16px; font-weight: 700; color: white; }
+.config-box p  { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.55; margin-top:-6px; }
+.config-box a  { color: var(--primary); }
+.config-label  {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-bottom: 5px;
+}
+.config-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.config-input:focus { border-color: var(--primary); }
+.config-input::placeholder { color: rgba(255,255,255,0.2); }
+.config-btns { display: flex; gap: 10px; }
+.config-save {
+  flex: 1; padding: 12px; background: var(--primary); color: white;
+  border: none; border-radius: 8px;
+  font-family: 'Sora',sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.config-save:hover { background: var(--primary-dark); }
+.config-cancel {
+  padding: 12px 16px; background: transparent;
+  color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  font-family: 'Sora',sans-serif; font-size: 14px;
+  cursor: pointer; transition: all 0.15s;
+}
+.config-cancel:hover { color: white; border-color: rgba(255,255,255,0.3); }
+/* gear + status */
+.gear-btn {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; transition: background 0.15s; z-index: 2;
+}
+.gear-btn:hover { background: rgba(255,255,255,0.14); }
+.fb-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  justify-content: center; margin-top: 6px;
+}
+.fb-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); flex-shrink: 0;
+}
+.fb-dot.connected { background: var(--sky); box-shadow: 0 0 5px var(--sky); }
+
+@media (max-width: 480px) {
+  .q-text { font-size: 15px; }
+  .home-title { font-size: 36px; }
+  .sol-q-preview { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="homeScreen" class="screen active">
+  <button class="gear-btn" onclick="showConfigModal()" title="Leaderboard Setup">⚙️</button>
+  <div class="home-content">
+    <div class="badge">SST · S3 E Math · 2026</div>
+    <h1 class="home-title">Trigo<br><span class="accent">Part A</span><br>Quiz</h1>
+    <p class="home-sub">Test your mastery of trig ratios, obtuse angles, area, sine & cosine rules. Climb the class leaderboard!</p>
+    <div class="topic-chips">
+      <span class="topic-chip chip-a">Trig Ratios</span>
+      <span class="topic-chip chip-b">Obtuse Angles</span>
+      <span class="topic-chip chip-c">Area of △</span>
+      <span class="topic-chip chip-d">Sine & Cosine Rule</span>
+    </div>
+    <div class="name-form">
+      <input class="name-input" id="nameInput" type="text" placeholder="Your name (e.g. Ravi Tan)" maxlength="30" />
+      <button class="start-btn" onclick="goToRevision()">Revise Key Concepts First →</button>
+      <button class="start-btn" style="background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);margin-top:-4px;font-size:14px;" onclick="skipToQuiz()">Skip revision — Start Quiz directly</button>
+      <button class="leaderboard-preview-btn" onclick="showLeaderboard(null)">🏆 View Leaderboard</button>
+    </div>
+    <div class="fb-status">
+      <div class="fb-dot" id="fbDot"></div>
+      <span id="fbStatusText">Leaderboard not set up — tap ⚙️</span>
+    </div>
+  </div>
+</div>
+
+<!-- REVISION -->
+<div id="revisionScreen" class="screen">
+  <!-- progress dots -->
+  <div class="rev-dots" id="revDots">
+    <div class="rev-dot active"></div>
+    <div class="rev-dot"></div>
+    <div class="rev-dot"></div>
+    <div class="rev-dot"></div>
+    <div class="rev-dot"></div>
+  </div>
+
+  <!-- slide deck -->
+  <div class="rev-deck" id="revDeck">
+
+    <!-- SLIDE 1: TRIG RATIOS -->
+    <div class="rev-slide slide-current theme-ratios" id="rev-slide-0">
+      <div class="rev-slide-header">
+        <div class="rev-big-icon">📐</div>
+        <div class="rev-slide-title">
+          <div class="rev-num">Topic 1 of 5</div>
+          <h2>Trig Ratios</h2>
+        </div>
+      </div>
+
+      <div class="rev-hook">
+        <span class="rev-hook-icon">🏗️</span>
+        <span>Engineers use these every day — to calculate the height of a building from a distance, or the angle a ramp must be built at. You're learning the same maths.</span>
+      </div>
+
+      <div class="rev-diagram">
+        <svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">
+          <!-- right-angle triangle: A(30,145) C(250,145) B(250,35) -->
+          <polygon points="30,145 250,145 250,35" fill="rgba(255,107,53,0.07)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <!-- right angle box at C -->
+          <rect x="236" y="131" width="14" height="14" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>
+          <!-- angle arc at A: from AC (right, 0°) CCW to AB (up-right, -27°), r=24, sweep=0 -->
+          <path d="M59,145 A24,24 0 0,0 56,134" fill="rgba(255,107,53,0.15)" stroke="#ff9f6b" stroke-width="2"/>
+          <!-- θ label at arc midpoint (-13.5°) -->
+          <text x="68" y="137" fill="#ff9f6b" font-size="13" font-family="Sora,sans-serif" font-weight="700">θ</text>
+          <!-- side labels -->
+          <!-- opposite (BC, vertical right side) -->
+          <text x="256" y="97" fill="#ff9f6b" font-size="12" font-family="JetBrains Mono,monospace" font-weight="600" text-anchor="start">opp</text>
+          <!-- adjacent (AC, horizontal base) -->
+          <text x="130" y="160" fill="#6bffb8" font-size="12" font-family="JetBrains Mono,monospace" font-weight="600" text-anchor="middle">adj</text>
+          <!-- hypotenuse (AB, diagonal) — label along midpoint of AB -->
+          <!-- AB midpoint = (140,90), slope = -26.6° -->
+          <text x="140" y="90" fill="#ffe06b" font-size="12" font-family="JetBrains Mono,monospace" font-weight="600" text-anchor="middle" transform="rotate(-27,140,90)">hyp</text>
+          <!-- vertex labels -->
+          <text x="15" y="152" fill="rgba(255,255,255,0.8)" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+          <text x="254" y="152" fill="rgba(255,255,255,0.6)" font-size="11" font-family="Sora,sans-serif">C</text>
+          <text x="254" y="32" fill="rgba(255,255,255,0.6)" font-size="11" font-family="Sora,sans-serif">B</text>
+          <!-- colour legend -->
+          <text x="10" y="20" fill="#ff9f6b" font-size="10" font-family="Sora,sans-serif" font-weight="600">sin θ = opp/hyp</text>
+          <text x="10" y="34" fill="#6bffb8" font-size="10" font-family="Sora,sans-serif" font-weight="600">cos θ = adj/hyp</text>
+          <text x="10" y="48" fill="#ffe06b" font-size="10" font-family="Sora,sans-serif" font-weight="600">tan θ = opp/adj</text>
+        </svg>
+      </div>
+
+      <div class="rev-formula-card">
+        <div class="rev-formula-label">The 3 ratios — SOH CAH TOA</div>
+        <div class="rev-formula-big">
+<span class="hi">sin θ</span> = <span class="hi">opposite</span> / hypotenuse
+<span class="hi2">cos θ</span> = <span class="hi2">adjacent</span> / hypotenuse
+<span class="hi3">tan θ</span> = <span class="hi3">opposite</span> / <span class="hi2">adjacent</span></div>
+      </div>
+
+      <div class="rev-cheatcode">
+        <div class="rev-cheat-badge">PRO TIP</div>
+        <div class="rev-cheat-text"><strong>Finding a side?</strong> Put the unknown on top and multiply.<br><strong>Finding an angle?</strong> Flip it → use sin⁻¹, cos⁻¹, or tan⁻¹.</div>
+      </div>
+
+      <div class="rev-watchout">
+        <span>⚠️</span>
+        <span>Opposite and adjacent <strong>swap</strong> depending on which angle you're using. Always identify your angle first before labelling sides.</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: OBTUSE ANGLES -->
+    <div class="rev-slide slide-right theme-obtuse" id="rev-slide-1">
+      <div class="rev-slide-header">
+        <div class="rev-big-icon">🌗</div>
+        <div class="rev-slide-title">
+          <div class="rev-num">Topic 2 of 5</div>
+          <h2>Obtuse Angles</h2>
+        </div>
+      </div>
+
+      <div class="rev-hook">
+        <span class="rev-hook-icon">🎯</span>
+        <span>Your calculator only gives you the acute angle. For obtuse triangles, you need to know when to add a second solution — this trips up almost everyone.</span>
+      </div>
+
+      <div class="rev-diagram">
+        <svg viewBox="0 0 280 155" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">
+          <!-- axes -->
+          <line x1="18" y1="82" x2="262" y2="82" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="140" y1="12" x2="140" y2="150" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <!-- unit circle, centre O(140,82), r=55 -->
+          <circle cx="140" cy="82" r="55" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+          <!-- Q1 radius at 40°: end=(182,47) -->
+          <line x1="140" y1="82" x2="182" y2="47" stroke="#ff9f6b" stroke-width="2.5"/>
+          <!-- Q2 radius at 140°: end=(98,47) — same y, symmetric -->
+          <line x1="140" y1="82" x2="98" y2="47" stroke="#b8a4ff" stroke-width="2.5"/>
+          <!-- dashed horizontal showing equal sine (same y) -->
+          <line x1="98" y1="47" x2="182" y2="47" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+          <!-- dots on circle -->
+          <circle cx="182" cy="47" r="4.5" fill="#ff9f6b"/>
+          <circle cx="98" cy="47" r="4.5" fill="#b8a4ff"/>
+          <!-- arc for θ: from +x axis (160,82) CCW (sweep=0) to Q1 direction at r=20: (155,69) -->
+          <path d="M160,82 A20,20 0 0,0 155,69" fill="rgba(255,107,53,0.12)" stroke="#ff9f6b" stroke-width="1.8"/>
+          <!-- arc for 180°−θ: from -x axis (120,82) CCW (sweep=0) to Q2 direction at r=20: (125,69) -->
+          <path d="M120,82 A20,20 0 0,0 125,69" fill="rgba(124,58,237,0.12)" stroke="#b8a4ff" stroke-width="1.8"/>
+          <!-- θ label at arc midpoint (mid angle ≈ -20°, r=29): (167,72) -->
+          <text x="167" y="72" fill="#ff9f6b" font-size="12" font-family="Sora,sans-serif" font-weight="700">θ</text>
+          <!-- 180°−θ label at arc midpoint (mid angle ≈ 160°, r=29): (111,73) -->
+          <text x="108" y="73" fill="#b8a4ff" font-size="11" font-family="Sora,sans-serif" font-weight="600">180°−θ</text>
+          <!-- Q1 / Q2 labels -->
+          <text x="192" y="28" fill="#ff9f6b" font-size="10" font-family="Sora,sans-serif" font-weight="700">Q1</text>
+          <text x="78" y="28" fill="#b8a4ff" font-size="10" font-family="Sora,sans-serif" font-weight="700">Q2</text>
+          <!-- "same sine" annotation with arrows -->
+          <text x="140" y="38" fill="rgba(255,255,255,0.55)" font-size="9" font-family="Sora,sans-serif" text-anchor="middle" font-weight="600">same height = same sin</text>
+          <!-- O label -->
+          <text x="143" y="96" fill="rgba(255,255,255,0.4)" font-size="11" font-family="Sora,sans-serif">O</text>
+        </svg>
+      </div>
+
+      <div class="rev-formula-card">
+        <div class="rev-formula-label">The two rules</div>
+        <div class="rev-formula-big">
+<span class="hi">sin A = sin(180° − A)</span>   <span style="opacity:.5;font-size:12px">← same value</span>
+<span class="hi4">cos A = −cos(180° − A)</span>  <span style="opacity:.5;font-size:12px">← flips sign</span></div>
+      </div>
+
+      <div class="rev-cheatcode">
+        <div class="rev-cheat-badge">PRO TIP</div>
+        <div class="rev-cheat-text">
+          <strong>sin x = k:</strong> TWO answers → sin⁻¹(k) and 180° − sin⁻¹(k)<br>
+          <strong>cos x = negative:</strong> ONE answer → cos⁻¹ gives it directly
+        </div>
+      </div>
+
+      <div class="rev-watchout">
+        <span>⚠️</span>
+        <span>For cosine, a <strong>negative result means obtuse</strong>. Don't subtract from 180° — your calculator already gives the right answer.</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: AREA -->
+    <div class="rev-slide slide-right theme-area" id="rev-slide-2">
+      <div class="rev-slide-header">
+        <div class="rev-big-icon">🔺</div>
+        <div class="rev-slide-title">
+          <div class="rev-num">Topic 3 of 5</div>
+          <h2>Area of a Triangle</h2>
+        </div>
+      </div>
+
+      <div class="rev-hook">
+        <span class="rev-hook-icon">🌍</span>
+        <span>Surveyors calculating land area, architects working out roof panels — whenever you have two sides and the angle between them, this formula is the one.</span>
+      </div>
+
+      <div class="rev-diagram">
+        <svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">
+          <!-- Triangle: A(35,138) B(238,138) C(160,28) -->
+          <!-- a=BC (opp A)  b=AC (opp B)  c=AB (opp C) -->
+          <polygon points="35,138 238,138 160,28" fill="rgba(44,182,125,0.1)" stroke="rgba(44,182,125,0.5)" stroke-width="2"/>
+          <!-- height from C(160,28) perpendicular to AB at foot (160,138) -->
+          <line x1="160" y1="28" x2="160" y2="138" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <!-- right-angle box at foot, drawn LEFT of the drop line -->
+          <polyline points="150,138 150,128 160,128" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <!-- angle arc at A(35,138): from AB(0°) CW-in-SVG to AC(38.4°), r=26 -->
+          <!-- angle arc at A(35,138): from AB(0°) CCW (sweep=0) to AC(-41.3°), r=26 -->
+          <!-- start=(61,138), end=(55,121) -->
+          <path d="M61,138 A26,26 0 0,0 55,121" fill="rgba(44,182,125,0.15)" stroke="#6bffb8" stroke-width="2"/>
+          <!-- angle label A at arc midpoint (mid≈-20.6°, r=36): (69,125) -->
+          <text x="69" y="125" fill="#6bffb8" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+          <!-- side a = BC (opp A): midpoint=(199,83), angle=-125° → use +55° so text reads correctly -->
+          <!-- offset outward to the right of BC: label at (209,76) -->
+          <text x="209" y="76" fill="#ffe06b" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(55,209,76)">a</text>
+          <!-- side b = AC (opp B): midpoint=(97.5,83), angle=-41° -->
+          <!-- offset to left of AC: label at (86,91) -->
+          <text x="86" y="91" fill="#ffe06b" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(-41,86,91)">b</text>
+          <!-- side c = AB (opp C): base midpoint=(136.5,138), label below -->
+          <text x="136" y="153" fill="#ffe06b" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle">c</text>
+          <!-- height label h -->
+          <text x="166" y="88" fill="rgba(255,255,255,0.4)" font-size="11" font-family="JetBrains Mono,monospace">h</text>
+          <!-- vertex labels -->
+          <text x="19" y="145" fill="rgba(255,255,255,0.8)" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+          <text x="241" y="145" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">B</text>
+          <text x="155" y="20" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">C</text>
+          <!-- hint: h = b sinA -->
+          <text x="140" y="12" fill="rgba(255,255,255,0.3)" font-size="9" font-family="Sora,sans-serif" text-anchor="middle">h = b sin A</text>
+        </svg>
+      </div>
+
+      <div class="rev-formula-card">
+        <div class="rev-formula-label">The formula</div>
+        <div class="rev-formula-big">
+Area = <span class="hi2">½ × b × c × sin A</span>
+
+A is the <span class="hi2">included angle</span> between sides b and c</div>
+      </div>
+
+      <div class="rev-cheatcode">
+        <div class="rev-cheat-badge">PRO TIP</div>
+        <div class="rev-cheat-text">
+          <strong>Parallelogram?</strong> Double it → Area = ab sin C<br>
+          <strong>Find the angle?</strong> Rearrange → sin C = (2 × Area) / (ab)
+        </div>
+      </div>
+
+      <div class="rev-watchout">
+        <span>⚠️</span>
+        <span>The angle <strong>must be between</strong> the two sides you're using. If it's not the included angle, the formula doesn't work directly.</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: SINE RULE -->
+    <div class="rev-slide slide-right theme-sine" id="rev-slide-3">
+      <div class="rev-slide-header">
+        <div class="rev-big-icon">〜</div>
+        <div class="rev-slide-title">
+          <div class="rev-num">Topic 4 of 5</div>
+          <h2>Sine Rule</h2>
+        </div>
+      </div>
+
+      <div class="rev-hook">
+        <span class="rev-hook-icon">⚓</span>
+        <span>Two ships and a lighthouse — if you know the angles from each ship to the lighthouse and the distance between the ships, you can find any missing measurement. That's the sine rule.</span>
+      </div>
+
+      <div class="rev-diagram">
+        <svg viewBox="0 0 280 158" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">
+          <!-- Triangle: A(45,135) B(225,135) C(150,25) -->
+          <!-- a=BC (opp A)  b=CA (opp B)  c=AB (opp C) -->
+          <polygon points="45,135 225,135 150,25" fill="rgba(245,158,11,0.07)" stroke="rgba(245,158,11,0.45)" stroke-width="2"/>
+
+          <!-- Angle arc at A(45,135): from AB(0°) CCW (sweep=0) to AC(-46.3°), r=22 -->
+          <!-- start=(67,135), end=(60,119), label at mid angle -23.1°: (74,122) -->
+          <path d="M67,135 A22,22 0 0,0 60,119" fill="rgba(245,158,11,0.12)" stroke="#ffe06b" stroke-width="1.8"/>
+          <text x="74" y="122" fill="#ffe06b" font-size="12" font-family="Sora,sans-serif" font-weight="700">A</text>
+
+          <!-- Angle arc at B(225,135): from BA(180°) CW (sweep=1) to BC(235.7°), r=22 -->
+          <!-- diff=55.7°>0 so sweep=1; start=(203,135), end=(213,117), label mid=207.8°: (197,120) -->
+          <path d="M203,135 A22,22 0 0,1 213,117" fill="rgba(245,158,11,0.12)" stroke="#ffe06b" stroke-width="1.8"/>
+          <text x="197" y="120" fill="#ffe06b" font-size="12" font-family="Sora,sans-serif" font-weight="700">B</text>
+
+          <!-- Angle arc at C(150,25): from CA(133.7°) CCW (sweep=0) to CB(55.7°), r=16 -->
+          <!-- diff=-78° so sweep=0; start=(139,37), end=(159,38), label mid=94.7°: (148,51) -->
+          <path d="M139,37 A16,16 0 0,0 159,38" fill="rgba(245,158,11,0.12)" stroke="#ffe06b" stroke-width="1.8"/>
+          <text x="148" y="51" fill="#ffe06b" font-size="12" font-family="Sora,sans-serif" font-weight="700">C</text>
+
+          <!-- side a = BC (opp A): midpoint=(187.5,80), angle=-124° → use +56° -->
+          <!-- offset outward (right side of BC): label at (178,87) -->
+          <text x="200" y="82" fill="#ff9f6b" font-size="14" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(56,200,82)">a</text>
+
+          <!-- side b = CA (opp B): midpoint=(97.5,80), angle=134° → use -46° (add/sub 180) -->
+          <!-- offset outward (left of CA): label at (89,72) -->
+          <text x="80" y="74" fill="#ff9f6b" font-size="14" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(-46,80,74)">b</text>
+
+          <!-- side c = AB (opp C): base midpoint=(135,135), label below -->
+          <text x="135" y="150" fill="#ff9f6b" font-size="14" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle">c</text>
+
+          <!-- vertex labels -->
+          <text x="28" y="144" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+          <text x="228" y="144" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">B</text>
+          <text x="144" y="17" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">C</text>
+
+          <!-- key: side is opposite its angle -->
+          <text x="8" y="13" fill="rgba(255,107,53,0.8)" font-size="9" font-family="Sora,sans-serif" font-weight="600">a opp A · b opp B · c opp C</text>
+        </svg>
+      </div>
+
+      <div class="rev-formula-card">
+        <div class="rev-formula-label">The rule — use a matching pair</div>
+        <div class="rev-formula-big">
+<span class="hi3">a</span>/sin A = <span class="hi3">b</span>/sin B = <span class="hi3">c</span>/sin C
+
+Finding a <span class="hi3">side</span>  → put unknown <span class="hi3">on top</span>
+Finding an <span class="hi">angle</span> → put sin? <span class="hi">on top</span></div>
+      </div>
+
+      <div class="rev-cheatcode">
+        <div class="rev-cheat-badge">PRO TIP</div>
+        <div class="rev-cheat-text">
+          <strong>Ambiguous case:</strong> 2 sides + non-included angle, and the side opposite the given angle is <em>shorter</em> than the other → could be 2 triangles. Always check both!
+        </div>
+      </div>
+
+      <div class="rev-watchout">
+        <span>⚠️</span>
+        <span>You <strong>must have a matched pair</strong> (a side and its opposite angle both known) to use this rule at all.</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: COSINE RULE -->
+    <div class="rev-slide slide-right theme-cosine" id="rev-slide-4">
+      <div class="rev-slide-header">
+        <div class="rev-big-icon">📡</div>
+        <div class="rev-slide-title">
+          <div class="rev-num">Topic 5 of 5</div>
+          <h2>Cosine Rule</h2>
+        </div>
+      </div>
+
+      <div class="rev-hook">
+        <span class="rev-hook-icon">🚀</span>
+        <span>GPS satellites, radar tracking, even game engines calculating collision angles — the cosine rule is the go-to when you have two sides and the angle clamped between them.</span>
+      </div>
+
+      <div class="rev-diagram">
+        <svg viewBox="0 0 280 158" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">
+          <!-- Triangle: A(40,138) B(240,138) C(95,28) -->
+          <!-- a=BC (opp A, unknown)  b=AC (opp B)  c=AB (opp C) -->
+          <!-- Angle A at vertex A, between sides b=AC and c=AB -->
+
+          <!-- sides b=AC and c=AB in theme blue -->
+          <line x1="40" y1="138" x2="240" y2="138" stroke="rgba(99,179,237,0.5)" stroke-width="2"/>
+          <line x1="40" y1="138" x2="95" y2="28" stroke="rgba(99,179,237,0.5)" stroke-width="2"/>
+          <!-- side a=BC as the unknown (dashed yellow) -->
+          <line x1="240" y1="138" x2="95" y2="28" stroke="#ffe06b" stroke-width="2.5" stroke-dasharray="8,4"/>
+          <polygon points="40,138 240,138 95,28" fill="rgba(99,179,237,0.06)" stroke="none"/>
+
+          <!-- Angle arc at A(40,138): from AB(0°) CCW (sweep=0) to AC(-63.4°), r=28 -->
+          <!-- start=(68,138), end=(53,113), label at mid angle -31.7°: (74,117) -->
+          <path d="M68,138 A28,28 0 0,0 53,113" fill="rgba(99,179,237,0.18)" stroke="#63b3ed" stroke-width="2.2"/>
+          <text x="74" y="117" fill="#63b3ed" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+
+          <!-- side a = BC (opp A): midpoint=(167.5,83), angle=-143° → use +37° -->
+          <!-- offset outward (right of BC): label at (160,93) -->
+          <text x="178" y="90" fill="#ffe06b" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(37,178,90)">a = ?</text>
+
+          <!-- side b = AC (opp B): midpoint=(67.5,83), angle=-63° -->
+          <!-- offset to left of AC: label at (55,78) -->
+          <text x="52" y="80" fill="#63b3ed" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle" transform="rotate(-63,52,80)">b</text>
+
+          <!-- side c = AB (opp C): base midpoint=(140,138), label below -->
+          <text x="140" y="153" fill="#63b3ed" font-size="13" font-family="JetBrains Mono,monospace" font-weight="700" text-anchor="middle">c</text>
+
+          <!-- vertex labels -->
+          <text x="23" y="146" fill="rgba(255,255,255,0.8)" font-size="13" font-family="Sora,sans-serif" font-weight="700">A</text>
+          <text x="243" y="146" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">B</text>
+          <text x="89" y="20" fill="rgba(255,255,255,0.7)" font-size="13" font-family="Sora,sans-serif" font-weight="700">C</text>
+
+          <!-- SAS badge -->
+          <rect x="195" y="8" width="76" height="20" rx="5" fill="rgba(99,179,237,0.15)" stroke="rgba(99,179,237,0.35)" stroke-width="1"/>
+          <text x="233" y="22" fill="#63b3ed" font-size="11" font-family="Sora,sans-serif" font-weight="700" text-anchor="middle">SAS → find a</text>
+        </svg>
+      </div>
+
+      <div class="rev-formula-card">
+        <div class="rev-formula-label">Finding a side (SAS) · Finding an angle (SSS)</div>
+        <div class="rev-formula-big">
+<span class="hi4">a²</span> = b² + c² − <span class="hi4">2bc cos A</span>
+
+Rearrange to find angle:
+<span class="hi2">cos A</span> = (b² + c² − a²) / <span class="hi2">2bc</span></div>
+      </div>
+
+      <div class="rev-cheatcode">
+        <div class="rev-cheat-badge">PRO TIP</div>
+        <div class="rev-cheat-text">
+          If cos A comes out <strong>negative</strong>, angle A is obtuse. The formula handles it automatically — no extra step.<br>
+          <strong>Largest angle</strong> is always opposite the longest side.
+        </div>
+      </div>
+
+      <div class="rev-watchout">
+        <span>⚠️</span>
+        <span>The angle you substitute <strong>must be opposite</strong> the side you're solving for. Mix these up and you'll get a wrong answer every time.</span>
+      </div>
+    </div>
+
+  </div><!-- end rev-deck -->
+
+  <!-- nav -->
+  <div class="rev-nav">
+    <button class="rev-prev-btn" id="revPrevBtn" onclick="revNav(-1)">← Back</button>
+    <button class="rev-next-btn" id="revNextBtn" onclick="revNav(1)">Next →</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-topbar">
+    <div class="quiz-topbar-left">
+      <span class="quiz-player-name" id="topbarName"></span>
+      <span class="quiz-progress-text" id="topbarProgress"></span>
+    </div>
+    <div class="quiz-score-display">
+      <div class="score-num" id="topbarScore">0</div>
+      <div class="score-label">Score</div>
+    </div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-meta">
+      <span class="q-num" id="qNum"></span>
+      <span class="q-tag" id="qTag"></span>
+    </div>
+    <div class="q-card">
+      <div class="q-text" id="qText"></div>
+      <div id="qSub"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback-box" id="feedbackBox">
+      <div class="fb-head" id="fbHead"></div>
+      <div id="fbBody"></div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next question →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="resultsScreen" class="screen">
+  <div class="results-content">
+    <div class="results-emoji" id="resultsEmoji">🎉</div>
+    <div class="results-title" id="resultsTitle">Quiz Complete!</div>
+    <div class="results-player" id="resultsPlayer"></div>
+    <div class="score-ring-wrap">
+      <div class="score-ring" id="scoreRing">
+        <div class="score-ring-text">
+          <span class="score-ring-num" id="ringScore">0</span>
+          <span class="score-ring-den" id="ringTotal">/ 15</span>
+        </div>
+      </div>
+    </div>
+    <div class="result-stats">
+      <div class="stat-box good"><div class="val" id="statCorrect">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box bad"><div class="val" id="statWrong">0</div><div class="lbl">Wrong</div></div>
+      <div class="stat-box time"><div class="val" id="statTime">0s</div><div class="lbl">Time</div></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-primary-r" onclick="showSolutions()">📋 View Full Solutions</button>
+      <button class="btn-secondary-r" onclick="showLeaderboard(true)">🏆 See Leaderboard</button>
+      <button class="btn-secondary-r" onclick="retryQuiz()">↺ Try Again</button>
+      <button class="btn-secondary-r" onclick="showScreen('homeScreen')">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- SOLUTIONS -->
+<div id="solutionsScreen" class="screen">
+  <div class="sol-topbar">
+    <h2>📋 Full Solutions</h2>
+    <div class="sol-score-badge" id="solScoreBadge">0/15</div>
+  </div>
+  <div class="sol-body">
+    <div class="sol-filter">
+      <button class="sol-filter-btn active-all" id="filterAll" onclick="filterSolutions('all')">All (15)</button>
+      <button class="sol-filter-btn" id="filterWrong" onclick="filterSolutions('wrong')">✗ Wrong</button>
+      <button class="sol-filter-btn" id="filterRight" onclick="filterSolutions('right')">✓ Correct</button>
+    </div>
+    <div id="solList"></div>
+  </div>
+  <div class="sol-actions">
+    <button class="sol-action-btn sol-action-secondary" onclick="showLeaderboard(true)">🏆 Leaderboard</button>
+    <button class="sol-action-btn sol-action-primary" onclick="retryQuiz()">↺ Try Again</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderScreen" class="screen">
+  <div style="max-width:500px;margin:0 auto;width:100%;">
+    <div class="leader-header">
+      <h2>🏆 Leaderboard</h2>
+      <p>Class rankings by correct answers</p>
+    </div>
+    <div class="podium" id="podium"></div>
+    <div class="leader-list" id="leaderList"></div>
+    <button class="leader-back" onclick="showScreen('homeScreen')">← Back to Home</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="streak-flash" id="streakFlash"></div>
+
+<script>
+// ── ALL QUESTIONS ──────────────────────────────────────────────────
+// Pool of 20 verified questions; quiz randomly picks 15 each attempt.
+//
+// VERIFICATION LOG (all computed by hand / calculator):
+// Q1:  sin∠BAC = 5/13. Check: opp=BC=5, hyp=AB=13. ✓
+// Q2:  QR = 10 sin35° = 5.7358 ≈ 5.74. ✓
+// Q3:  tan35° = 5/x → x = 5/tan35° = 5/0.7002 = 7.143 ≈ 7.14. ✓ (replaced bad Q3)
+// Q4:  tan A = BC/AB with ∠B=90°. ✓
+// Q5:  height = 6 sin70° = 5.638 ≈ 5.64. ✓
+// Q6:  sin130° = sin50°. ✓
+// Q7:  cos53° = −cos127° = −(−0.602) = 0.602. ✓
+// Q8:  sinx=0.7 has 2 solutions in [0°,180°]. ✓
+// Q9:  cos⁻¹(−0.834) = 146.47° ≈ 146.5°. ✓
+// Q10: BCD right-angled at C, BC=12 CD=5 BD=13. ∠CDB acute, cos∠CDB=5/13.
+//      ∠ADB = 180°−∠CDB (straight line ADB... wait: D is on AC not on BD.
+//      Actually ∠ADB + ∠CDB = 180° only if A,D,B,... no.
+//      Setup: B,C,D collinear (BCD straight line), ∠ACB=90°, so:
+//      In △BCD: ∠BCD=90°, BC=12, CD=5, BD=13. cos∠BDC = CD/BD = 5/13.
+//      ∠ADB: since BCD is straight, ∠ADC + ∠ADB are at vertex D on line BCD.
+//      Actually ∠ADB is at vertex D looking from A to B. Since BDC is straight,
+//      ∠ADB = 180° − ∠ADC. Need ∠ADC: in △ACD, AC=16 (=AB−BC... wait
+//      AB=20, BC=12 → AC² = AB²−BC² = 400−144=256 → AC=16.
+//      D on AC with CD=5, so AD=AC−CD=16−5=11.
+//      In △BCD right-angled at C: tan∠BDC = BC/CD = 12/5. So ∠BDC = arctan(12/5).
+//      cos∠BDC = 5/13. ∠ADB = 180°−∠BDC (supplementary on straight line BDsomething?)
+//      No — B,C,D is a straight line. D is between B and C? No: D is on AC.
+//      Rereading Example 6: "D is a point on AC". BCD is a straight line.
+//      So B,C,D are collinear with C between B and D (since D is on AC extended? or AC with D between A and C?).
+//      Notes say CD=5, DA=11, AC=AD+DC=16. AC=16 matches √(20²−12²)=16. ✓
+//      BCD straight line: B—C—D. In △BCD, ∠BCD=90° (since ∠ACB=90° and BCD straight → ∠DCB=90°). BC=12, CD=5, BD=13. ✓
+//      ∠ADB: A is above line BCD. ∠ADB is the angle at D in △ADB.
+//      ∠CDB is the angle at D in △CDB (same as ∠BDC above) = acute angle.
+//      Since A and B are on the same side? No—A is above, B is to the left of C on the line.
+//      ∠ADB + ∠ADB... Let's use the notes answer directly: cos∠ADB = −5/13. ✓ (confirmed by notes Example 6d)
+// Q11: Area = ½×8×10×sin44° = 40×0.6947=27.79≈27.8. ✓
+// Q12: sin∠XYZ = 2×12/(5×6) = 24/30 = 0.8 → 53.13°≈53.1°. ✓
+// Q13: Area parallelogram = 5.8×5.3×sin117° = 30.74×0.8910=27.39≈27.4. ✓
+// Q14: ∠A = 180°−58.3°−39.4° = 82.3°. ✓
+// Q15: sinR/10.2 = sin42°/12 → sinR = 10.2×0.6691/12 = 6.825/12 = 0.5688 → R=34.68°≈34.7°. ✓
+// Q16: Ambiguous case definition. ✓
+// Q17: Largest side QR=18 → largest angle ∠P. ✓
+// Q18: PR²=10.8²+15.9²−2(10.8)(15.9)cos71°=116.64+252.81−2×171.72×0.3256=369.45−111.88=257.57→PR=16.05≈16.1. ✓
+// Q19: Cosine rule usage. ✓
+// Q20: In △ABC AP=5,PC=8,∠APC=60° → AC²=5²+8²−2(5)(8)cos60°=25+64−40=49→AC=7. ✓
+
+const ALL_QUESTIONS = [
+  // ── TRIG RATIOS (5 questions) ──────────────────────────────────
+  {tag:'ratios', tagLabel:'Trig Ratios',
+   q:'In right-angled △ABC with ∠C = 90°, AB = 13 cm, BC = 5 cm, AC = 12 cm. What is sin ∠BAC?',
+   opts:['5/13','12/13','5/12','13/5'], ans:0,
+   explain:'sin ∠BAC = opposite ÷ hypotenuse = BC ÷ AB = 5 ÷ 13. (SOH: Sin = Opp/Hyp. The side opposite ∠A is BC; the hypotenuse is AB.)'},
+
+  {tag:'ratios', tagLabel:'Trig Ratios',
+   q:'In right-angled △PQR with ∠R = 90°, PQ = 10 cm and ∠QPR = 35°. Find QR to 3 s.f.',
+   opts:['5.74 cm','8.19 cm','7.66 cm','6.43 cm'], ans:0,
+   explain:'QR is opposite ∠QPR = 35°, and PQ = 10 cm is the hypotenuse. SOH: sin 35° = QR/10 → QR = 10 × sin 35° = 5.736 ≈ 5.74 cm.'},
+
+  {tag:'ratios', tagLabel:'Trig Ratios',
+   q:'In right-angled △ABC (∠C = 90°), BC = 5 cm and ∠BAC = 35°. Using tan 35° = 5/x, find AC (x) to 3 s.f.',
+   mathLine:'tan 35° = BC/AC = 5/x',
+   opts:['7.14 cm','3.50 cm','8.72 cm','6.10 cm'], ans:0,
+   explain:'TOA: tan 35° = opposite/adjacent = BC/AC = 5/x. Rearrange: x = 5 ÷ tan 35° = 5 ÷ 0.7002 = 7.141 ≈ 7.14 cm.'},
+
+  {tag:'ratios', tagLabel:'Trig Ratios',
+   q:'In right-angled △ABC with ∠B = 90°, which expression gives tan A?',
+   opts:['BC/AB','AB/BC','AC/BC','BC/AC'], ans:0,
+   explain:'With ∠B = 90°, the hypotenuse is AC. For angle A: the opposite side is BC and the adjacent side is AB. TOA: tan A = opposite/adjacent = BC/AB.'},
+
+  {tag:'ratios', tagLabel:'Trig Ratios',
+   q:'A ladder 6 m long leans against a vertical wall, making an angle of 70° with the ground. How high up the wall does the top of the ladder reach? (3 s.f.)',
+   opts:['5.64 m','2.05 m','4.10 m','6.38 m'], ans:0,
+   explain:'The height (opposite to 70°) = 6 × sin 70° = 6 × 0.9397 = 5.638 ≈ 5.64 m. The ladder is the hypotenuse; use SOH.'},
+
+  // ── OBTUSE ANGLES (5 questions) ────────────────────────────────
+  {tag:'obtuse', tagLabel:'Obtuse Angles',
+   q:'Using sin A = sin(180° − A), what is the value of sin 130°?',
+   mathLine:'sin 130° = sin(180° − 130°) = sin ___°',
+   opts:['sin 50°','sin 40°','−sin 50°','cos 50°'], ans:0,
+   explain:'sin 130° = sin(180° − 130°) = sin 50°. Sine is positive in both Q1 and Q2, so obtuse angles share the same sine value as their supplementary acute angle.'},
+
+  {tag:'obtuse', tagLabel:'Obtuse Angles',
+   q:'Given sin 84° = 0.995 (3 s.f.), find sin 96° without a calculator.',
+   mathLine:'sin 96° = sin(180° − 96°) = sin ___°',
+   opts:['0.995','−0.995','0.105','−0.105'], ans:0,
+   explain:'sin 96° = sin(180° − 96°) = sin 84° = 0.995. Since sin A = sin(180° − A), they share the same value.'},
+
+  {tag:'obtuse', tagLabel:'Obtuse Angles',
+   q:'Given cos 129° = −0.629 (3 s.f.), find cos 51° without a calculator.',
+   mathLine:'cos 51° = −cos(180° − 51°) = −cos ___°',
+   opts:['0.629','−0.629','0.777','−0.777'], ans:0,
+   explain:'cos 51° = −cos(180° − 51°) = −cos 129° = −(−0.629) = 0.629. Cosine is negative in Q2, so cos A = −cos(180° − A).'},
+
+  {tag:'obtuse', tagLabel:'Obtuse Angles',
+   q:'Given 0° ≤ x ≤ 180°, how many solutions does sin x = 0.7 have?',
+   opts:['2','1','0','3'], ans:0,
+   explain:'sin⁻¹(0.7) ≈ 44.4° (acute). Since sin is also positive in Q2, x = 180° − 44.4° = 135.6° is a second solution. Both are in [0°, 180°], so there are 2 solutions.'},
+
+  {tag:'obtuse', tagLabel:'Obtuse Angles',
+   q:'Given 0° ≤ x ≤ 180°, solve cos x = −0.834. Give your answer to 1 d.p.',
+   opts:['146.5°','33.5°','213.5°','56.3°'], ans:0,
+   explain:'cos x is negative → x must be obtuse (Q2). Use the calculator directly: x = cos⁻¹(−0.834) ≈ 146.5°. For cosine of obtuse angles, the calculator gives the answer directly — no need to subtract from 180°.'},
+
+  // ── AREA OF TRIANGLE (3 questions) ────────────────────────────
+  {tag:'area', tagLabel:'Area of Triangle',
+   q:'Find the area of △ABC where AB = 8 cm, AC = 10 cm and ∠BAC = 44°. Give your answer to 3 s.f.',
+   opts:['27.8 cm²','40.0 cm²','34.6 cm²','13.9 cm²'], ans:0,
+   explain:'Area = ½ × AB × AC × sin∠BAC = ½ × 8 × 10 × sin 44° = 40 × 0.6947 = 27.79 ≈ 27.8 cm².'},
+
+  {tag:'area', tagLabel:'Area of Triangle',
+   q:'The area of acute △XYZ is 12 cm². Given XY = 5 cm and YZ = 6 cm, find ∠XYZ to 1 d.p.',
+   opts:['53.1°','36.9°','48.6°','23.6°'], ans:0,
+   explain:'Area = ½ × XY × YZ × sin∠XYZ → 12 = ½ × 5 × 6 × sin∠XYZ → sin∠XYZ = 24/30 = 0.8 → ∠XYZ = sin⁻¹(0.8) ≈ 53.1°. (The obtuse solution 126.9° is rejected since the triangle is stated acute.)'},
+
+  {tag:'area', tagLabel:'Area of Triangle',
+   q:'A parallelogram has adjacent sides 5.8 cm and 5.3 cm, with one interior angle of 117°. Find its area to 3 s.f.',
+   opts:['27.4 cm²','23.8 cm²','30.7 cm²','13.7 cm²'], ans:0,
+   explain:'A parallelogram = 2 triangles. Area = 2 × (½ × 5.8 × 5.3 × sin 117°) = 5.8 × 5.3 × sin 117° = 30.74 × 0.8910 ≈ 27.4 cm².'},
+
+  // ── SINE RULE (4 questions) ────────────────────────────────────
+  {tag:'sine', tagLabel:'Sine Rule',
+   q:'In △ABC, ∠B = 58.3°, ∠C = 39.4° and BC = 12.5 cm. Find ∠A.',
+   opts:['82.3°','39.4°','58.3°','98.3°'], ans:0,
+   explain:'Angle sum of a triangle = 180°. ∠A = 180° − 58.3° − 39.4° = 82.3°. (You need ∠A before applying the Sine Rule to find sides AB or AC.)'},
+
+  {tag:'sine', tagLabel:'Sine Rule',
+   q:'In △ABC, ∠B = 58.3°, ∠C = 39.4° and BC = 12.5 cm. Using the Sine Rule, find AB to 3 s.f. (∠A = 82.3°)',
+   mathLine:'AB/sin C = BC/sin A',
+   opts:['8.01 cm','10.7 cm','12.5 cm','9.63 cm'], ans:0,
+   explain:'AB/sin 39.4° = 12.5/sin 82.3° → AB = 12.5 × sin 39.4° / sin 82.3° = 12.5 × 0.6334 / 0.9907 ≈ 8.00 ≈ 8.01 cm. (Keep AB in the numerator when finding an unknown side.)'},
+
+  {tag:'sine', tagLabel:'Sine Rule',
+   q:'In △PQR, ∠Q = 42°, PR = 12 cm and PQ = 10.2 cm. Using the Sine Rule, find ∠R to 1 d.p.',
+   mathLine:'sin R / PQ = sin Q / PR',
+   opts:['34.7°','55.3°','42.0°','28.4°'], ans:0,
+   explain:'sin R / 10.2 = sin 42° / 12 → sin R = 10.2 × sin 42° / 12 = 10.2 × 0.6691 / 12 = 0.5688 → ∠R = sin⁻¹(0.5688) ≈ 34.7°. (PQ is opposite ∠R; PR is opposite ∠Q.)'},
+
+  {tag:'sine', tagLabel:'Sine Rule',
+   q:'The ambiguous case of the Sine Rule can give two possible triangles. Which set of given information causes this?',
+   opts:['Two sides and a non-included angle, where the side opposite the given angle is shorter than the other given side','Two sides and the included angle between them','All three sides','Two angles and any one side'], ans:0,
+   explain:'Ambiguous case (SSA): given two sides and a non-included angle. When the side opposite the given angle is shorter than the adjacent given side, sin⁻¹ gives an acute angle — and 180° minus that is also a valid obtuse solution, producing two possible triangles.'},
+
+  // ── COSINE RULE (3 questions) ──────────────────────────────────
+  {tag:'cosine', tagLabel:'Cosine Rule',
+   q:'In △PQR, PQ = 13 cm, QR = 18 cm and PR = 11 cm. Which angle of the triangle is the largest?',
+   opts:['∠P (opposite QR = 18 cm)','∠Q (opposite PR = 11 cm)','∠R (opposite PQ = 13 cm)','Cannot be determined without angles'], ans:0,
+   explain:'In any triangle, the largest angle is opposite the longest side. QR = 18 cm is the longest side, and QR is opposite ∠P, so ∠P is largest. (Using the Cosine Rule confirms ∠P ≈ 96.8°.)'},
+
+  {tag:'cosine', tagLabel:'Cosine Rule',
+   q:'In △PQR, PQ = 10.8 cm, QR = 15.9 cm and ∠PQR = 71°. Find PR using the Cosine Rule. (3 s.f.)',
+   mathLine:'PR² = PQ² + QR² − 2(PQ)(QR) cos∠PQR',
+   opts:['16.1 cm','14.3 cm','18.8 cm','12.6 cm'], ans:0,
+   explain:'PR² = 10.8² + 15.9² − 2(10.8)(15.9)cos 71° = 116.64 + 252.81 − 343.44 × 0.3256 = 369.45 − 111.81 = 257.64 → PR = √257.64 ≈ 16.1 cm. (cos 71° = 0.32557 to 5 s.f.)'},
+
+  {tag:'cosine', tagLabel:'Cosine Rule',
+   q:'In △APC, AP = 5 m, PC = 8 m and ∠APC = 60°. Find AC using the Cosine Rule.',
+   mathLine:'AC² = AP² + PC² − 2(AP)(PC) cos∠APC',
+   opts:['7 m','9.43 m','6.24 m','8.54 m'], ans:0,
+   explain:'AC² = 5² + 8² − 2(5)(8)cos 60° = 25 + 64 − 80 × 0.5 = 89 − 40 = 49 → AC = √49 = 7 m exactly. (This is from Example 17 in the notes.)'},
+];
+
+// ── STATE ──────────────────────────────────────────────────────────
+let playerName = '';
+let quizQuestions = [];
+let currentQ = 0;
+let score = 0;
+let wrongCount = 0;
+let answered = false;
+let startTime = 0;
+let streak = 0;
+let answerLog = []; // tracks {q, chosen, correct} for solutions screen
+let solFilter = 'all';
+
+// ── LEADERBOARD — Google Apps Script backend ───────────────────────
+// The quiz posts to a public GAS Web App URL.
+// No API keys are stored in the browser — the Sheet credentials stay
+// entirely on Google's servers. Students cannot tamper with the data.
+
+const GAS_URL_KEY = 'gas_url';  // key in localStorage for the Web App URL
+
+function getGasUrl() {
+  return localStorage.getItem(GAS_URL_KEY) || '';
+}
+function saveGasUrl(url) {
+  localStorage.setItem(GAS_URL_KEY, url);
+}
+
+async function saveScore(name, correct, total, timeSec) {
+  const url = getGasUrl();
+  if (!url) return [];
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save', name, correct, total, timeSec })
+    });
+    const data = await res.json();
+    return Array.isArray(data.board) ? data.board : [];
+  } catch(e) {
+    console.error('GAS save error', e);
+    return [];
+  }
+}
+
+async function getLeaderboard() {
+  const url = getGasUrl();
+  if (!url) return [];
+  try {
+    const res = await fetch(`${url}?action=get`);
+    const data = await res.json();
+    return Array.isArray(data.board) ? data.board : [];
+  } catch(e) {
+    console.error('GAS read error', e);
+    return [];
+  }
+}
+
+// ── GAS URL CONFIG UI ──────────────────────────────────────────────
+function showConfigModal() {
+  document.getElementById('gasUrlInput').value = getGasUrl();
+  document.getElementById('configModal').style.display = 'flex';
+}
+function hideConfigModal() {
+  document.getElementById('configModal').style.display = 'none';
+}
+function saveConfig() {
+  const url = document.getElementById('gasUrlInput').value.trim();
+  if (!url.startsWith('https://script.google.com')) {
+    showToast('Please enter a valid Apps Script URL');
+    return;
+  }
+  saveGasUrl(url);
+  hideConfigModal();
+  showToast('✓ Leaderboard connected!');
+  updateStatus();
+}
+
+function updateStatus() {
+  const dot  = document.getElementById('fbDot');
+  const text = document.getElementById('fbStatusText');
+  if (!dot || !text) return;
+  const url = getGasUrl();
+  if (url) {
+    dot.classList.add('connected');
+    text.textContent = 'Leaderboard connected ✓';
+  } else {
+    dot.classList.remove('connected');
+    text.textContent = 'Leaderboard not set up — tap ⚙️';
+  }
+}
+window.addEventListener('load', updateStatus);
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goToRevision() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { showToast('Please enter your name first!'); return; }
+  playerName = name;
+  revCurrentSlide = 0;
+  renderRevSlide(0, 0);
+  showScreen('revisionScreen');
+}
+
+function skipToQuiz() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { showToast('Please enter your name first!'); return; }
+  playerName = name;
+  startQuiz();
+}
+
+function beginQuiz() {
+  startQuiz();
+}
+
+// ── REVISION SLIDE DECK ───────────────────────────────────────────
+const REV_TOTAL = 5;
+let revCurrentSlide = 0;
+
+function renderRevSlide(newIdx, direction) {
+  const slides = document.querySelectorAll('.rev-slide');
+  const dots   = document.querySelectorAll('.rev-dot');
+  const prev   = document.getElementById('revPrevBtn');
+  const next   = document.getElementById('revNextBtn');
+
+  slides.forEach((s, i) => {
+    s.classList.remove('slide-current','slide-left','slide-right');
+    if (i === newIdx) s.classList.add('slide-current');
+    else if (i < newIdx) s.classList.add('slide-left');
+    else s.classList.add('slide-right');
+    s.scrollTop = 0;
+  });
+
+  dots.forEach((d, i) => {
+    d.classList.toggle('active', i === newIdx);
+  });
+
+  prev.style.visibility = newIdx === 0 ? 'hidden' : 'visible';
+
+  if (newIdx === REV_TOTAL - 1) {
+    next.textContent = "Let's go! Start Quiz →";
+    next.style.background = 'var(--sky)';
+  } else {
+    next.textContent = 'Next →';
+    next.style.background = 'var(--primary)';
+  }
+
+  revCurrentSlide = newIdx;
+}
+
+function revNav(dir) {
+  const next = revCurrentSlide + dir;
+  if (next < 0) return;
+  if (next >= REV_TOTAL) { beginQuiz(); return; }
+  renderRevSlide(next, dir);
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  quizQuestions = shuffle(ALL_QUESTIONS).slice(0, 15).map(q => shuffleOpts(q));
+  currentQ = 0; score = 0; wrongCount = 0; answered = false; streak = 0;
+  answerLog = [];
+  startTime = Date.now();
+  document.getElementById('topbarName').textContent = playerName;
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function retryQuiz() {
+  quizQuestions = shuffle(ALL_QUESTIONS).slice(0, 15).map(q => shuffleOpts(q));
+  currentQ = 0; score = 0; wrongCount = 0; answered = false; streak = 0;
+  answerLog = [];
+  startTime = Date.now();
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+// Shuffle the options for a question, returning a new object with
+// shuffledOpts (reordered array) and shuffledAns (new index of correct answer).
+// The original q.opts and q.ans are untouched.
+function shuffleOpts(q) {
+  const indices = [0, 1, 2, 3];
+  // Fisher-Yates on indices
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const shuffledOpts = indices.map(i => q.opts[i]);
+  const shuffledAns  = indices.indexOf(q.ans); // where did the correct answer end up?
+  return { ...q, shuffledOpts, shuffledAns };
+}
+
+const TAG_CLASS = {ratios:'tag-ratios',obtuse:'tag-obtuse',area:'tag-area',sine:'tag-sine',cosine:'tag-cosine'};
+
+function renderQuestion() {
+  const q = quizQuestions[currentQ];
+  answered = false;
+
+  document.getElementById('qNum').textContent = `Q${currentQ+1} of ${quizQuestions.length}`;
+  document.getElementById('qTag').textContent = q.tagLabel;
+  document.getElementById('qTag').className = `q-tag ${TAG_CLASS[q.tag]}`;
+  document.getElementById('qText').textContent = q.q;
+
+  const sub = document.getElementById('qSub');
+  sub.innerHTML = q.mathLine ? `<code class="q-math">${q.mathLine}</code>` : '';
+
+  document.getElementById('progressFill').style.width = `${(currentQ / quizQuestions.length) * 100}%`;
+  document.getElementById('topbarProgress').textContent = `${currentQ+1} / ${quizQuestions.length}`;
+  document.getElementById('topbarScore').textContent = score;
+
+  const letters = ['A','B','C','D'];
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+
+  q.shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, btn);
+    optsEl.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box';
+  const next = document.getElementById('nextBtn');
+  next.className = 'next-btn';
+  next.textContent = currentQ < quizQuestions.length - 1 ? 'Next question →' : 'See my results →';
+}
+
+function selectAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+  const q = quizQuestions[currentQ];
+  const correct = idx === q.shuffledAns;
+  const allBtns = document.querySelectorAll('.opt-btn');
+
+  allBtns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.shuffledAns) b.classList.add('correct');
+    else if (i === idx && !correct) b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  });
+
+  // Log this answer for the solutions screen
+  answerLog.push({ q, chosen: idx, wasCorrect: correct });
+
+  const fb = document.getElementById('feedbackBox');
+  const fbHead = document.getElementById('fbHead');
+  const fbBody = document.getElementById('fbBody');
+
+  if (correct) {
+    score++;
+    streak++;
+    document.getElementById('topbarScore').textContent = score;
+    fb.className = 'feedback-box correct-fb show';
+    fbHead.textContent = streak >= 3 ? `🔥 ${streak} in a row! Correct!` : '✓ Correct!';
+    fbBody.innerHTML = q.explain;
+    if (streak >= 3) showStreakFlash(`🔥 ${streak}×`);
+  } else {
+    wrongCount++;
+    streak = 0;
+    fb.className = 'feedback-box wrong-fb show';
+    fbHead.textContent = '✗ Not quite';
+    fbBody.innerHTML = `The correct answer is <strong>${q.shuffledOpts[q.shuffledAns]}</strong>.<br><br>${q.explain}`;
+  }
+
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= quizQuestions.length) {
+    finishQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+async function finishQuiz() {
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  const pct = Math.round((score / quizQuestions.length) * 100);
+
+  document.getElementById('resultsEmoji').textContent =
+    pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '💪' : '📚';
+  document.getElementById('resultsTitle').textContent =
+    pct >= 90 ? 'Outstanding!' : pct >= 70 ? 'Great work!' : pct >= 50 ? 'Good effort!' : 'Keep practising!';
+  document.getElementById('resultsPlayer').textContent = playerName;
+  document.getElementById('ringScore').textContent = score;
+  document.getElementById('ringTotal').textContent = `/ ${quizQuestions.length}`;
+  document.getElementById('statCorrect').textContent = score;
+  document.getElementById('statWrong').textContent = wrongCount;
+  document.getElementById('statTime').textContent = elapsed + 's';
+
+  // animate ring
+  const ring = document.getElementById('scoreRing');
+  ring.style.setProperty('--pct', `${pct}%`);
+
+  showScreen('resultsScreen');
+  await saveScore(playerName, score, quizQuestions.length, elapsed);
+}
+
+// ── SOLUTIONS ─────────────────────────────────────────────────────
+const SOL_TAG_CLASS = {ratios:'sol-tag-ratios',obtuse:'sol-tag-obtuse',area:'sol-tag-area',sine:'sol-tag-sine',cosine:'sol-tag-cosine'};
+const LETTERS = ['A','B','C','D'];
+
+function showSolutions() {
+  solFilter = 'all';
+  document.getElementById('solScoreBadge').textContent = `${score}/${quizQuestions.length}`;
+  renderSolutions();
+  showScreen('solutionsScreen');
+}
+
+function filterSolutions(mode) {
+  solFilter = mode;
+  document.getElementById('filterAll').className = 'sol-filter-btn' + (mode==='all' ? ' active-all' : '');
+  document.getElementById('filterWrong').className = 'sol-filter-btn' + (mode==='wrong' ? ' active-wrong' : '');
+  document.getElementById('filterRight').className = 'sol-filter-btn' + (mode==='right' ? ' active-right' : '');
+  renderSolutions();
+}
+
+function renderSolutions() {
+  const list = document.getElementById('solList');
+  list.innerHTML = '';
+
+  const filtered = solFilter === 'all'  ? answerLog
+                 : solFilter === 'wrong' ? answerLog.filter(e => !e.wasCorrect)
+                 : answerLog.filter(e => e.wasCorrect);
+
+  // Update filter button counts
+  const wrongCount2 = answerLog.filter(e=>!e.wasCorrect).length;
+  const rightCount  = answerLog.filter(e=> e.wasCorrect).length;
+  document.getElementById('filterAll').textContent   = `All (${answerLog.length})`;
+  document.getElementById('filterWrong').textContent = `✗ Wrong (${wrongCount2})`;
+  document.getElementById('filterRight').textContent = `✓ Correct (${rightCount})`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;">
+      ${solFilter==='wrong' ? '🎉 No wrong answers to show!' : 'No correct answers to show.'}
+    </div>`;
+    return;
+  }
+
+  filtered.forEach((entry, displayIdx) => {
+    const { q, chosen, wasCorrect } = entry;
+    const globalIdx = answerLog.indexOf(entry);
+    const cardId = `sol-card-${globalIdx}`;
+
+    const card = document.createElement('div');
+    card.className = `sol-card ${wasCorrect ? 'sol-correct' : 'sol-wrong'}`;
+    card.id = cardId;
+
+    // Build options HTML using the shuffled order the student actually saw
+    let optsHtml = '';
+    q.shuffledOpts.forEach((opt, i) => {
+      let rowClass = 'sol-a-plain';
+      let icon = '';
+      if (i === q.shuffledAns) { rowClass = 'sol-a-correct'; icon = '✓'; }
+      else if (i === chosen && !wasCorrect) { rowClass = 'sol-a-wrong'; icon = '✗'; }
+      optsHtml += `<div class="sol-answer-row ${rowClass}">
+        <span class="sol-answer-icon">${icon || '·'}</span>
+        <span class="sol-answer-label">${LETTERS[i]}</span>
+        <span>${opt}</span>
+      </div>`;
+    });
+
+    const mathHtml = q.mathLine ? `<code class="sol-math-line">${q.mathLine}</code>` : '';
+    const chosenText = chosen >= 0 ? `You chose: <strong>${LETTERS[chosen]}. ${q.shuffledOpts[chosen]}</strong>` : '';
+
+    card.innerHTML = `
+      <div class="sol-card-header" onclick="toggleSolCard('${cardId}')">
+        <div class="sol-status-dot"></div>
+        <span class="sol-q-label">Q${globalIdx+1}</span>
+        <span class="sol-q-topic ${SOL_TAG_CLASS[q.tag]}">${q.tagLabel}</span>
+        <span class="sol-q-preview">${q.q}</span>
+        <span class="sol-chevron">▶</span>
+      </div>
+      <div class="sol-card-body">
+        <div class="sol-q-full">${q.q}</div>
+        ${mathHtml}
+        <div class="sol-answers">${optsHtml}</div>
+        ${!wasCorrect ? `<div style="font-size:12px;color:var(--wrong);margin-bottom:10px;">${chosenText}</div>` : ''}
+        <div class="sol-working">
+          <div class="sol-working-head">Working</div>
+          ${q.explain}
+        </div>
+      </div>`;
+
+    list.appendChild(card);
+  });
+}
+
+function toggleSolCard(id) {
+  document.getElementById(id).classList.toggle('sol-open');
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────
+async function showLeaderboard(fromResults) {
+  showScreen('leaderScreen');
+  const board = await getLeaderboard();
+  renderLeaderboard(board, fromResults ? playerName : null);
+}
+
+function renderLeaderboard(board, myName) {
+  const podiumEl = document.getElementById('podium');
+  const listEl = document.getElementById('leaderList');
+  podiumEl.innerHTML = '';
+  listEl.innerHTML = '';
+
+  if (!board.length) {
+    listEl.innerHTML = `<div class="empty-leader"><div class="icon">🏆</div><p>No scores yet — be the first to play!</p></div>`;
+    renderPodiumEmpty();
+    return;
+  }
+
+  // Podium (top 3, order: 2nd, 1st, 3rd)
+  const podiumOrder = [1, 0, 2];
+  const rankEmojis = ['🥇','🥈','🥉'];
+  const rankClasses = ['rank-2','rank-1','rank-3'];
+  podiumOrder.forEach((idx) => {
+    const slot = document.createElement('div');
+    const rank = idx + 1;
+    slot.className = `podium-slot ${rankClasses[podiumOrder.indexOf(idx)]}`;
+    if (board[idx]) {
+      const pct = Math.round(board[idx].correct / board[idx].total * 100);
+      slot.innerHTML = `
+        <div class="podium-name">${board[idx].name}</div>
+        <div class="podium-score-small">${board[idx].correct}/${board[idx].total}</div>
+        <div class="podium-block">${rankEmojis[idx]}</div>`;
+    } else {
+      slot.innerHTML = `<div class="podium-block">—</div>`;
+      slot.classList.add('empty');
+    }
+    podiumEl.appendChild(slot);
+  });
+
+  // List
+  board.forEach((entry, i) => {
+    const isMe = myName && entry.name.toLowerCase() === myName.toLowerCase();
+    const row = document.createElement('div');
+    row.className = `leader-row${isMe ? ' me' : ''}`;
+    const pct = Math.round(entry.correct / entry.total * 100);
+    row.innerHTML = `
+      <div class="leader-rank ${i < 3 ? 'top' : ''}">${i < 3 ? rankEmojis[i] : '#'+(i+1)}</div>
+      <div class="leader-name">${entry.name}${isMe ? '<span class="you-tag">YOU</span>' : ''}</div>
+      <div style="text-align:right">
+        <div class="leader-score">${entry.correct}/${entry.total}</div>
+        <div class="leader-pct">${pct}%</div>
+      </div>`;
+    listEl.appendChild(row);
+  });
+}
+
+function renderPodiumEmpty() {
+  const podiumEl = document.getElementById('podium');
+  ['rank-2','rank-1','rank-3'].forEach(cls => {
+    const slot = document.createElement('div');
+    slot.className = `podium-slot ${cls} empty`;
+    slot.innerHTML = `<div class="podium-block">—</div>`;
+    podiumEl.appendChild(slot);
+  });
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showStreakFlash(text) {
+  const el = document.getElementById('streakFlash');
+  el.textContent = text;
+  el.className = 'streak-flash pop';
+  setTimeout(() => el.classList.add('fade'), 600);
+  setTimeout(() => el.className = 'streak-flash', 1100);
+}
+
+// Enter key on name input
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goToRevision();
+});
+</script>
+
+<!-- GAS URL CONFIG MODAL -->
+<div class="config-modal" id="configModal">
+  <div class="config-box">
+    <h3>⚙️ Leaderboard Setup</h3>
+    <p>
+      Paste your Google Apps Script Web App URL below.<br>
+      See the setup guide in <code>leaderboard_gas.gs</code> for instructions.
+    </p>
+    <div>
+      <div class="config-label">Apps Script Web App URL *</div>
+      <input class="config-input" id="gasUrlInput"
+        placeholder="https://script.google.com/macros/s/.../exec" />
+    </div>
+    <div class="config-btns">
+      <button class="config-save" onclick="saveConfig()">Save & Connect</button>
+      <button class="config-cancel" onclick="hideConfigModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
